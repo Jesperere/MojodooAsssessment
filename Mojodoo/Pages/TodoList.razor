@@ -1,0 +1,95 @@
+﻿@page "/Todolist"
+@inject INoteService NoteService
+@inject NavigationManager NavigationManager
+@using Blazored.Typeahead
+@using Mojodoo.Data
+@using System
+
+
+
+<h3>TodoList</h3>
+
+<div class="form-inline">
+    <label class="sr-only" for="search-name">Search</label>
+    <input type="text class="form-control mb-2 mr-sm-2"
+           @*@bind-value="searchText"*@
+            placeholder="Search for notes..." />
+    <button type="button" class="btn btn-primary mr-sm-2 mb-2" 
+    @onclick="() => Search()" @*Search method does not work*@>Search</button>
+</div>
+
+
+
+<table class="table">
+    <thead>
+        <tr>
+            <th class="test"></th>
+            <th>Todo</th>
+            <th>Date Created</th>
+            <th>Completed</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var note in NoteService.Notes.OrderBy(n => n.CreatedDate))
+        {        
+            <tr>    
+                @if(@note.IsActive == true)
+                {
+                <label><input type="checkbox" @bind-value="@note.IsActive" checked></label>
+                <td class="text-decoration-line-through">@note.Todo</td>
+                <td class="text-decoration-line-through">@note.CreatedDate</td>    
+                <td>Yes</td>
+                <td>
+                    <button class="btn btn-primary"
+                        @onclick="(() => ShowNote(note.Id))">
+                        <i class="oi oi-pencil"></i>
+                    </button>
+                </td>       
+                }
+                else
+                {
+                <label><input type="checkbox" @bind-value="@note.IsActive"></label>
+                <td>@note.Todo</td>
+                <td>@note.CreatedDate</td> 
+                <td>No</td>
+                <td>
+                    <button class="btn btn-primary"
+                        @onclick="(() => ShowNote(note.Id))">
+                        <i class="oi oi-pencil"></i>
+                    </button>
+                </td>              
+                }             
+        </tr>      
+        }
+    </tbody>
+</table>
+<button class="btn btn-primary" @onclick="CreateNewNote">Create Note</button>
+
+@code {
+    public string? searchText {get; set; }
+
+    public async Task Search() // cant get this to work - aslo in INoteService.cs and NoteService.cs
+    {
+        await NoteService.SearchNotes(searchText);
+
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        await NoteService.LoadNotes();
+    }
+
+    void ShowNote(int id)
+    {
+        NavigationManager.NavigateTo($"todolists/{id}");
+    }
+
+    void CreateNewNote()
+    {
+        NavigationManager.NavigateTo("todolists");
+    }
+
+
+
+ }
+
